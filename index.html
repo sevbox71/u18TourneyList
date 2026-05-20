@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minor Hockey Tournaments</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 14px; background: #f4f6f9; padding: 12px; }
+
+  h2 { font-size: 18px; color: #1a3a5c; margin-bottom: 3px; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 12px; }
+
+  /* STATS PILLS */
+  .stats { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .stat { color: white; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; white-space: nowrap; }
+
+  /* FILTERS */
+  .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .filter-item { display: flex; flex-direction: column; gap: 3px; }
+  .filter-item label { font-size: 11px; color: #444; font-weight: bold; }
+  .filter-item select, .filter-item input[type=text] {
+    font-size: 14px; padding: 8px 10px; border: 1px solid #ccc;
+    border-radius: 6px; background: white; width: 100%;
+  }
+  .filter-checks { display: flex; gap: 16px; align-items: center; grid-column: 1 / -1; flex-wrap: wrap; }
+  .check-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #444; font-weight: bold; cursor: pointer; }
+  .check-label input[type=checkbox] { width: 18px; height: 18px; accent-color: #1a3a5c; cursor: pointer; }
+  .search-wrap { grid-column: 1 / -1; }
+
+  .count { font-size: 12px; color: #666; margin-bottom: 8px; }
+
+  /* BADGE */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; white-space: nowrap; }
+  .canam   { background: #e8f4fd; color: #1565c0; }
+  .gthl    { background: #e8f5e9; color: #2e7d32; }
+  .omha    { background: #fff3e0; color: #e65100; }
+  .alliance{ background: #f3e5f5; color: #6a1b9a; }
+  .gene    { background: #fce4ec; color: #880e4f; }
+  .usa-flag { display: inline-block; background: #c0392b; color: white; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
+
+  /* CARDS (mobile default) */
+  .card-list { display: flex; flex-direction: column; gap: 10px; }
+  .card {
+    background: white; border-radius: 10px; padding: 12px 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1); border: 2px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .card.attending { border-color: #f0a500; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .card-name { font-weight: bold; font-size: 14px; color: #1a3a5c; line-height: 1.3; flex: 1; }
+  .card-cb-wrap { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .card-cb-wrap label { font-size: 11px; color: #b07d00; font-weight: bold; }
+  .card-cb { width: 20px; height: 20px; accent-color: #f0a500; cursor: pointer; flex-shrink: 0; }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: #555; margin-bottom: 5px; align-items: center; }
+  .card-meta span { white-space: nowrap; }
+  .card-dates { font-size: 13px; font-weight: bold; color: #333; }
+  .card-detail { font-size: 12px; color: #666; margin-top: 4px; line-height: 1.5; }
+  .card-detail strong { color: #333; }
+
+  /* TABLE (desktop) */
+  .table-wrap { display: none; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  thead th { background: #1a3a5c; color: white; padding: 9px 10px; text-align: left; font-size: 11px; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #f0f4f8; }
+  tbody tr:hover { background: #d6e8f7; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; vertical-align: top; font-size: 12px; line-height: 1.4; }
+  tr.attending td { border-top: 2px solid #f0a500; border-bottom: 2px solid #f0a500; }
+  tr.attending td:first-child { border-left: 3px solid #f0a500; }
+  tr.attending td:last-child { border-right: 3px solid #f0a500; }
+  .attend-cb { width: 15px; height: 15px; accent-color: #f0a500; cursor: pointer; }
+
+  @media (min-width: 700px) {
+    .card-list { display: none; }
+    .table-wrap { display: block; }
+    .filters { grid-template-columns: auto auto auto auto; }
+    .filter-checks { grid-column: auto; }
+    .search-wrap { grid-column: auto; }
+    .filter-item input[type=text] { width: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<h2>⛸️ Minor Hockey Tournaments — Master List</h2>
+<p class="subtitle">5 sources · 47 tournaments · Sorted by date (earliest first)</p>
+
+<div class="stats">
+  <div class="stat" style="background:#1a3a5c">47 Total</div>
+  <div class="stat" style="background:#1565c0">CANAM: 7</div>
+  <div class="stat" style="background:#2e7d32">GTHL: 8</div>
+  <div class="stat" style="background:#e65100">OMHA: 22</div>
+  <div class="stat" style="background:#6a1b9a">Alliance: 6</div>
+  <div class="stat" style="background:#880e4f">Gene Harrington: 4</div>
+  <div class="stat" style="background:#c0392b">🇺🇸 Cross-Border: 4</div>
+</div>
+
+<div class="filters">
+  <div class="filter-item">
+    <label>Source</label>
+    <select id="srcFilter" onchange="filter()">
+      <option value="">All Sources</option>
+      <option>CANAM</option><option>GTHL</option><option>OMHA</option><option>Alliance</option><option>Gene Harrington</option>
+    </select>
+  </div>
+  <div class="filter-item">
+    <label>Month</label>
+    <select id="monthFilter" onchange="filter()">
+      <option value="">All Months</option>
+      <option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option><option>Jan</option><option>Feb</option>
+    </select>
+  </div>
+  <div class="filter-item search-wrap">
+    <label>Search</label>
+    <input type="text" id="search" placeholder="Name or location..." oninput="filter()">
+  </div>
+  <div class="filter-checks">
+    <label class="check-label">
+      <input type="checkbox" id="usaFilter" onchange="filter()"> 🇺🇸 USA only
+    </label>
+    <label class="check-label">
+      <input type="checkbox" id="attendingFilter" onchange="filter()"> ⭐ Attending only
+    </label>
+  </div>
+</div>
+
+<div class="count" id="countLabel">Showing 47 of 47 tournaments<span id="attendCount"></span></div>
+
+<!-- MOBILE CARDS -->
+<div class="card-list" id="cardList"></div>
+
+<!-- DESKTOP TABLE -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>#</th><th>★</th><th>Tournament Name</th><th>Source</th><th>Organizer / Location</th><th>Dates</th><th>Levels</th><th>Age Divisions</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+const data = [
+  {name:"Aurora VERY Early Bird",src:"OMHA",org:"Aurora",dates:"Sep 18–20, 2026",sort:"2026-09-18",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Milton Winterhawks Early Bird",src:"OMHA",org:"Milton",dates:"Sep 18–20, 2026",sort:"2026-09-18",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Scarborough Ice Raiders Early Bird",src:"GTHL",org:"Scarborough Ice Raiders",dates:"Sep 25–27, 2026",sort:"2026-09-25",levels:"AA, A",ages:"U10–U18",usa:false},
+  {name:"Newmarket Renegades Early Bird",src:"OMHA",org:"Newmarket",dates:"Sep 25–27, 2026",sort:"2026-09-25",levels:"A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Aurora Early Bird",src:"OMHA",org:"Aurora",dates:"Sep 24–27, 2026",sort:"2026-09-24",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"TNT Early Bird",src:"OMHA",org:"New Tecumseth",dates:"Sep 26–27, 2026",sort:"2026-09-26",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"West Mall Lightning 'A' Early Bird",src:"GTHL",org:"West Mall Lightning",dates:"Sep 30 – Oct 4, 2026",sort:"2026-09-30",levels:"A",ages:"U11–U18",usa:false},
+  {name:"South Simcoe Storm Classic",src:"OMHA",org:"South Simcoe",dates:"Oct 2–4, 2026",sort:"2026-10-02",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Forest Hill – Avenue Road Preseason Faceoff",src:"GTHL",org:"Avenue Road Ducks",dates:"Oct 9–11, 2026",sort:"2026-10-09",levels:"A",ages:"U10–U18",usa:false},
+  {name:"Hamilton Steel / Huskies Classic",src:"Alliance",org:"Hamilton Steel Hockey Club",dates:"Oct 9–11, 2026",sort:"2026-10-09",levels:"BB, B",ages:"U18",usa:false},
+  {name:"Coyotes A Challenge Cup",src:"GTHL",org:"MHL-Applewood Coyotes",dates:"Oct 15–18, 2026",sort:"2026-10-15",levels:"A",ages:"U10–U18 (excl. U14)",usa:false},
+  {name:"Essa Eagles Fall Classic",src:"OMHA",org:"Essa",dates:"Oct 23–25, 2026",sort:"2026-10-23",levels:"A, BB, B",ages:"U10–U18",usa:false},
+  {name:"The Gene Harrington",src:"Gene Harrington",org:"Buffalo/Niagara Falls, NY",dates:"Oct 23–25, 2026",sort:"2026-10-23",levels:"A, BB, House, House Select",ages:"2013/2012, 2011/2010/18U",usa:true},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Oct 30 – Nov 1, 2026",sort:"2026-10-30",levels:"A, BB, B, House A, Select Tier 1",ages:"13-14, 15-16, 17-18",usa:false},
+  {name:"Peter Mancuso November Challenge",src:"OMHA",org:"Niagara Falls",dates:"Nov 6–8, 2026",sort:"2026-11-06",levels:"AA, A, BB",ages:"U10–U18",usa:false},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Nov 13–15, 2026",sort:"2026-11-13",levels:"A, BB, B, House A, Select Tier 1",ages:"11-12, 13-14",usa:false},
+  {name:"Paul Dossey Memorial Tournament",src:"OMHA",org:"South Simcoe",dates:"Nov 13–15, 2026",sort:"2026-11-13",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Welland Little NHL",src:"OMHA",org:"Welland",dates:"Nov 13–15, 2026",sort:"2026-11-13",levels:"A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Kutting Edge Klassic A/B",src:"OMHA",org:"Barrie",dates:"Nov 20–22, 2026",sort:"2026-11-20",levels:"A, BB, B",ages:"U10–U18",usa:false},
+  {name:"Nazem Kadri North London Classic",src:"Alliance",org:"North London Nationals",dates:"Nov 20–22, 2026",sort:"2026-11-20",levels:"BB, B",ages:"U18",usa:false},
+  {name:"Stoney Creek 42nd Annual Tournament of Champions",src:"OMHA",org:"Stoney Creek",dates:"Nov 20–22, 2026",sort:"2026-11-20",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"The Gene Harrington",src:"Gene Harrington",org:"Buffalo/Niagara Falls, NY",dates:"Nov 20–22, 2026",sort:"2026-11-20",levels:"A, BB, House, House Select (GTHL A)",ages:"2017–2013, 2012/2011/2010/18U",usa:true},
+  {name:"Bulldog Challenge Cup",src:"Alliance",org:"Burlington Lions Optimist MHA",dates:"Nov 27–29, 2026",sort:"2026-11-27",levels:"BB, B",ages:"U18",usa:false},
+  {name:"Platinum Cup",src:"GTHL",org:"Greater Toronto Hockey League",dates:"Nov 27–29, 2026",sort:"2026-11-27",levels:"AAA, AA, A",ages:"U11 only",usa:false},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Nov 27–29, 2026",sort:"2026-11-27",levels:"A, BB, B, House A, Select Tier 1",ages:"9-10, 11-12, 13-14",usa:false},
+  {name:"Dan Pulham Memorial Tournament",src:"Alliance",org:"London Bandits Hockey Association",dates:"Dec 4–6, 2026",sort:"2026-12-04",levels:"BB, B",ages:"U18",usa:false},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Dec 4–6, 2026",sort:"2026-12-04",levels:"A, BB, B, House A, Select Tier 1",ages:"15-16, 17-18",usa:false},
+  {name:"Adam Keunen AA All Star Challenge",src:"OMHA",org:"West Niagara",dates:"Dec 10–13, 2026",sort:"2026-12-10",levels:"AAA, AA, A, BB",ages:"U10–U21",usa:false},
+  {name:"U16 & U18 Winterlude",src:"OMHA",org:"Ajax-Pickering",dates:"Dec 10–13, 2026",sort:"2026-12-10",levels:"AA, A, BB, SL",ages:"U16, U18",usa:false},
+  {name:"Vaughan Regional 'A' Silver Stick",src:"GTHL",org:"Vaughan Rangers",dates:"Dec 10–13, 2026",sort:"2026-12-10",levels:"A",ages:"U10–U18",usa:false},
+  {name:"60th Annual Hespeler Olympics",src:"OMHA",org:"Hespeler",dates:"Dec 27–30, 2026",sort:"2026-12-27",levels:"A, BB, SL, MD",ages:"U9–U18",usa:false},
+  {name:"Wayne Gretzky International Tournament",src:"Alliance",org:"Brantford Minor Hockey Association",dates:"Dec 27–30, 2026",sort:"2026-12-27",levels:"BB, B",ages:"U18",usa:false},
+  {name:"Halton Hills Thunder Memorial",src:"OMHA",org:"Halton Hills",dates:"Jan 8–10, 2027",sort:"2027-01-08",levels:"BB, B",ages:"U10–U18",usa:false},
+  {name:"Toronto Aeros Winter Challenge",src:"GTHL",org:"Toronto Aeros",dates:"Jan 14–17, 2027",sort:"2027-01-14",levels:"AA, A",ages:"U10–U18",usa:false},
+  {name:"Winter Classic",src:"OMHA",org:"Oakville Rangers",dates:"Jan 14–17, 2027",sort:"2027-01-14",levels:"AAA, AA, A, BB",ages:"U10–U18",usa:false},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Jan 15–17, 2027",sort:"2027-01-15",levels:"AAA, AA, A, BB, House A, Select Tier 1",ages:"9-10, 11-12, 13-14",usa:false},
+  {name:"Boston Pizza Cup January Classic",src:"OMHA",org:"St. Thomas",dates:"Jan 21–24, 2027",sort:"2027-01-21",levels:"BB",ages:"U14–U18",usa:false},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Jan 22–24, 2027",sort:"2027-01-22",levels:"A, BB, B, House A/B, Select Tier 1/2/3",ages:"9-10, 11-12, 13-14",usa:false},
+  {name:"The Gene Harrington",src:"Gene Harrington",org:"Buffalo/Niagara Falls, NY",dates:"Jan 22–24, 2027",sort:"2027-01-22",levels:"A, BB, House, House Select",ages:"2017/2016, 2015/2014",usa:true},
+  {name:"King Playoff Challenge Cup",src:"OMHA",org:"King Township",dates:"Jan 29–31, 2027",sort:"2027-01-29",levels:"AA, A, BB",ages:"U10–U18",usa:false},
+  {name:"Melanie Clancy Memorial Tournament",src:"OMHA",org:"Peterborough",dates:"Jan 29–31, 2027",sort:"2027-01-29",levels:"AA, A, BB, B",ages:"U9–U18",usa:false},
+  {name:"Kennedy Challenge 2027",src:"GTHL",org:"North York Knights",dates:"Feb 4–7, 2027",sort:"2027-02-04",levels:"A",ages:"U10–U18 (excl. U16)",usa:false},
+  {name:"Halton Hills Winter Classic",src:"OMHA",org:"Halton Hills",dates:"Feb 5–7, 2027",sort:"2027-02-05",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"South Simcoe Storm Classic (Feb)",src:"OMHA",org:"South Simcoe",dates:"Feb 5–7, 2027",sort:"2027-02-05",levels:"AA, A, BB, B",ages:"U10–U18",usa:false},
+  {name:"CANAM Tournament",src:"CANAM",org:"Montreal, QC",dates:"Feb 12–14, 2027",sort:"2027-02-12",levels:"A, BB, B, House A/B, Select Tier 1/2/3",ages:"9-10, 11-12, 13-14, 17-18",usa:false},
+  {name:"The Gene Harrington",src:"Gene Harrington",org:"Buffalo/Niagara Falls, NY",dates:"Feb 19–21, 2027",sort:"2027-02-19",levels:"A, BB, House, House Select",ages:"2013/2012, 2011/2010/18U",usa:true},
+  {name:"Doug Jarrett Memorial Tournament",src:"Alliance",org:"West London Minor Hockey Association",dates:"Feb 26–28, 2027",sort:"2027-02-26",levels:"BB, B",ages:"U18",usa:false},
+];
+
+const badgeClass = {CANAM:"canam",GTHL:"gthl",OMHA:"omha",Alliance:"alliance","Gene Harrington":"gene"};
+const STORAGE_KEY = "hockey_attending_v1";
+
+// Load persisted selections from localStorage
+const attending = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"));
+
+function saveAttending() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...attending]));
+  } catch(e) {}
+}
+
+function toggleAttend(key) {
+  if (attending.has(key)) attending.delete(key);
+  else attending.add(key);
+  saveAttending();
+  updateAttendCount();
+  filter();
+}
+
+function updateAttendCount() {
+  const el = document.getElementById("attendCount");
+  if (el) el.textContent = attending.size > 0 ? ` · ⭐ ${attending.size} attending` : "";
+}
+
+function filter() {
+  const src = document.getElementById("srcFilter").value;
+  const mon = document.getElementById("monthFilter").value;
+  const usa = document.getElementById("usaFilter").checked;
+  const attendOnly = document.getElementById("attendingFilter").checked;
+  const q = document.getElementById("search").value.toLowerCase();
+
+  const cardList = document.getElementById("cardList");
+  const tbody = document.getElementById("tbody");
+  cardList.innerHTML = "";
+  tbody.innerHTML = "";
+  let shown = 0;
+
+  data.forEach((t) => {
+    const key = t.name + "|" + t.dates;
+    if (src && t.src !== src) return;
+    if (mon && !t.dates.includes(mon)) return;
+    if (usa && !t.usa) return;
+    if (attendOnly && !attending.has(key)) return;
+    if (q && !t.name.toLowerCase().includes(q) && !t.org.toLowerCase().includes(q)) return;
+    shown++;
+    const isAttending = attending.has(key);
+    const usaHtml = t.usa ? '<span class="usa-flag">🇺🇸 USA</span>' : '';
+    const badgeCls = badgeClass[t.src];
+
+    // CARD
+    const card = document.createElement("div");
+    card.className = "card" + (isAttending ? " attending" : "");
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-name">${t.name} ${usaHtml}</div>
+        <div class="card-cb-wrap">
+          <label for="cb-${shown}">Going</label>
+          <input type="checkbox" class="card-cb" id="cb-${shown}" ${isAttending ? "checked" : ""}>
+        </div>
+      </div>
+      <div class="card-meta">
+        <span class="badge ${badgeCls}">${t.src}</span>
+        <span class="card-dates">📅 ${t.dates}</span>
+        <span>📍 ${t.org}</span>
+      </div>
+      <div class="card-detail">
+        <strong>Levels:</strong> ${t.levels} &nbsp;·&nbsp; <strong>Ages:</strong> ${t.ages}
+      </div>`;
+    card.querySelector(".card-cb").addEventListener("change", () => toggleAttend(key));
+    cardList.appendChild(card);
+
+    // TABLE ROW
+    const tr = document.createElement("tr");
+    if (isAttending) tr.classList.add("attending");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "attend-cb";
+    cb.checked = isAttending;
+    cb.addEventListener("change", () => toggleAttend(key));
+    const cbTd = document.createElement("td");
+    cbTd.style.textAlign = "center";
+    cbTd.appendChild(cb);
+    tr.innerHTML = `<td style="text-align:center;color:#999">${shown}</td>`;
+    tr.appendChild(cbTd);
+    tr.insertAdjacentHTML("beforeend", `
+      <td><strong>${t.name}</strong> ${usaHtml}</td>
+      <td><span class="badge ${badgeCls}">${t.src}</span></td>
+      <td>${t.org}</td>
+      <td style="white-space:nowrap">${t.dates}</td>
+      <td>${t.levels}</td>
+      <td>${t.ages}</td>`);
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("countLabel").textContent = `Showing ${shown} of ${data.length} tournaments`;
+  updateAttendCount();
+}
+
+filter();
+</script>
+</body>
+</html>
