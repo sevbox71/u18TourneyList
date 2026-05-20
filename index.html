@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minor Hockey Tournament List</title>
+<title>Minor Hockey Tournaments</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; font-size: 14px; background: #f4f6f9; padding: 12px; }
@@ -78,12 +78,52 @@
     .search-wrap { grid-column: auto; }
     .filter-item input[type=text] { width: 180px; }
   }
+
+  /* PRINT BUTTON */
+  .print-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #1a3a5c; color: white; border: none; border-radius: 6px;
+    padding: 8px 14px; font-size: 13px; font-weight: bold; cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .print-btn:hover { background: #254f7a; }
+
+  /* PRINT STYLES */
+  @media print {
+    body { background: white; padding: 0; font-size: 11px; }
+    .stats, .filters, .count, .card-list, .print-btn { display: none !important; }
+    .table-wrap { display: block !important; }
+    table { box-shadow: none; border-radius: 0; font-size: 10px; }
+    thead th { background: #1a3a5c !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px 8px; }
+    td { padding: 5px 8px; }
+    tbody tr:nth-child(even) { background: #f0f4f8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.attending td { border-top: 2px solid #f0a500 !important; border-bottom: 2px solid #f0a500 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.attending td:first-child { border-left: 3px solid #f0a500 !important; }
+    tr.attending td:last-child { border-right: 3px solid #f0a500 !important; }
+    .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .usa-flag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .attend-cb { display: none; }
+    th:nth-child(2) { display: none; }
+    td:nth-child(2) { display: none; }
+    .print-header { display: block !important; }
+    a { text-decoration: none; color: inherit; }
+  }
+  .print-header { display: none; margin-bottom: 10px; }
+  .print-header h2 { font-size: 16px; color: #1a3a5c; }
+  .print-header p { font-size: 11px; color: #666; margin-top: 2px; }
 </style>
 </head>
 <body>
 
+<div class="print-header">
+  <h2>⛸️ Minor Hockey Tournaments — Master List</h2>
+  <p id="printSubtitle">5 sources · 47 tournaments · Sorted by date (earliest first)</p>
+</div>
+
 <h2>⛸️ Minor Hockey Tournaments — Master List</h2>
 <p class="subtitle">5 sources · 47 tournaments · Sorted by date (earliest first)</p>
+
+<button class="print-btn" onclick="printList()">🖨️ Print List</button>
 
 <div class="stats">
   <div class="stat" style="background:#1a3a5c">47 Total</div>
@@ -287,6 +327,13 @@ function filter() {
 
   document.getElementById("countLabel").textContent = `Showing ${shown} of ${data.length} tournaments`;
   updateAttendCount();
+}
+
+function printList() {
+  const shown = document.getElementById("countLabel").textContent;
+  const subtitle = document.getElementById("printSubtitle");
+  if (subtitle) subtitle.textContent = shown + " · Printed " + new Date().toLocaleDateString("en-CA");
+  window.print();
 }
 
 filter();
